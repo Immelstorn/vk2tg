@@ -19,6 +19,7 @@ namespace vk2tg.Services
         private static readonly string TelegraphAccessToken = ConfigurationManager.AppSettings["TelegraphAccessToken"];
         private const string ImgTemplate = "<img src='{0}'/>";
         private const string VideoTemplate = "<a href='{0}'>Video: {0}</a>";
+        private const string AudioTemplate = "<a href='{0}'>{1} - {2}</a>";
         private const string UnsupportedAttachment = "Unsupported attachment";
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
         
@@ -47,6 +48,10 @@ namespace vk2tg.Services
                             var embedLink = vkService.GetVideoInfo(attachment.video.owner_id, attachment.video.vid, attachment.video.access_key);
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(string.Format(VideoTemplate, embedLink));
+                            break;
+                        case "audio":
+                            htmlBuilder.AppendLine("<br>");
+                            htmlBuilder.AppendLine(string.Format(AudioTemplate, attachment.audio.url, attachment.audio.artist, attachment.audio.title));
                             break;
                         default:
                             htmlBuilder.AppendLine("<br>");
