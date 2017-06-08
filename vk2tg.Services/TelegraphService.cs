@@ -27,7 +27,7 @@ namespace vk2tg.Services
             var doc = new HtmlDocument();
             var htmlBuilder = new StringBuilder(post.text);
             var vkService = new VkService();
-            if (post.attachments.Any())
+            if (post.attachments != null && post.attachments.Any())
             {
                 foreach(var attachment in post.attachments)
                 {

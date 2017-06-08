@@ -65,14 +65,14 @@ namespace vk2tg.Services
         {
             const string method = "wall.get";
             const Method httpMethod = Method.GET;
-            var parameters = $"owner_id={subscriptionId}&count={count}&filter=owner";
+            var parameters = $"owner_id={subscriptionId}&count={count + 1}&filter=owner";
 
             foreach(var token in EnumerateTokens())
             {
                 var newPosts = GetListResult<WallPost>(method, token, parameters, httpMethod);
                 if(newPosts != null && newPosts.Any())
                 {
-                    return newPosts.Where(p => p.id > lastPostId).ToList();
+                    return newPosts.Where(p => p.id > lastPostId && p.marked_as_ads != 1).OrderByDescending(p => p.id).Take(count).OrderBy(p => p.id).ToList();
                 }
             }
 
