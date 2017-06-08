@@ -133,7 +133,7 @@ namespace vk2tg.Webhooks.Controllers
                     await _tgService.SendMessage(chatId, string.Format(Texts.GroupIsNotFound, result)); 
                     return;
                 }
-                var post = _vkService.GetPosts(-group.gid, 0, 1).FirstOrDefault();
+                var post = _vkService.GetPosts(-group.gid, 0, 1).LastOrDefault();
                 var lastPostId = post?.id ?? 0; //if group is new and doesn't contain any posts
                 var subscribed = await _dataService.AddSubscription(-group.gid, group.screen_name, lastPostId, chatId);
 
@@ -170,7 +170,7 @@ namespace vk2tg.Webhooks.Controllers
                 body = body.Substring(lastIndex + 1, body.Length - lastIndex - 1);
             }
 
-            if (body.Any(c=> !char.IsLetterOrDigit(c)))
+            if(body.Any(c => !char.IsLetterOrDigit(c) && c != '.' && c != '_'))
             {
                 return null;
             }

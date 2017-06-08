@@ -2,6 +2,9 @@
 using System.Linq;
 using System.Text;
 using HtmlAgilityPack;
+using Imgur.API.Authentication.Impl;
+using Imgur.API.Endpoints.Impl;
+using Imgur.API.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
@@ -32,7 +35,13 @@ namespace vk2tg.Services
                     {
                         case "photo":
                             htmlBuilder.AppendLine("<br>");
-                            htmlBuilder.AppendLine(string.Format(ImgTemplate, attachment.photo.src_big));
+
+                            var imgurResult = UploadPhoto(attachment.photo.src_big);
+                            htmlBuilder.AppendLine(string.Format(ImgTemplate,
+                                                                     string.IsNullOrEmpty(imgurResult?.Link) 
+                                                                         ? attachment.photo.src_big 
+                                                                         : imgurResult.Link));
+
                             break;
                         case "video":
                             var embedLink = vkService.GetVideoInfo(attachment.video.owner_id, attachment.video.vid, attachment.video.access_key);
@@ -70,6 +79,14 @@ namespace vk2tg.Services
             }
 
             return null;
+        }
+
+        private static IImage UploadPhoto(string url)
+        {
+            var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
+            var endpoint = new ImageEndpoint(imgur);
+            var result = endpoint.UploadImageUrlAsync(url).Result;
+            return result;
         }
 
         private static object DomToNode(HtmlNode node)
