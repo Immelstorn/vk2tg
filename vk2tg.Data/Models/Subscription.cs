@@ -9,6 +9,7 @@ namespace vk2tg.Data.Models
         public int Id { get; set; }
         public long SubscriptionId { get; set; }
         public string SubscriptionName { get; set; }
+        public string SubscriptionPrettyName { get; set; }
         public long LastPostId { get; set; }
         public virtual ICollection<User> Users { get; set; }
     }

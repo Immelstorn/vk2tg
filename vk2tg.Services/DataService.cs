@@ -48,7 +48,7 @@ namespace vk2tg.Services
         }
 
 
-        public async Task<bool> AddSubscription(long id, string name, long lastpostId, long chatId)
+        public async Task<bool> AddSubscription(long id, string name, string prettyName, long lastpostId, long chatId)
         {
             using(var db = new Vk2TgDbContext())
             {
@@ -65,6 +65,7 @@ namespace vk2tg.Services
                     subscription = new Subscription {
                         SubscriptionId = id,
                         SubscriptionName = name,
+                        SubscriptionPrettyName = prettyName,
                         LastPostId = lastpostId
                     };
                     db.Subscriptions.Add(subscription);

@@ -66,6 +66,10 @@
     <Compile Include="Migrations\201706021712058_addSubscriptionName.Designer.cs">
       <DependentUpon>201706021712058_addSubscriptionName.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201706081553020_AddPrettyName.cs" />
+    <Compile Include="Migrations\201706081553020_AddPrettyName.Designer.cs">
+      <DependentUpon>201706081553020_AddPrettyName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Subscription.cs" />
     <Compile Include="Models\Telegraph\TelegraphContent.cs" />
@@ -111,6 +115,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706021712058_addSubscriptionName.resx">
       <DependentUpon>201706021712058_addSubscriptionName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706081553020_AddPrettyName.resx">
+      <DependentUpon>201706081553020_AddPrettyName.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
