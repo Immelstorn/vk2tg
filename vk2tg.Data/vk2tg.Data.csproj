@@ -70,7 +70,12 @@
     <Compile Include="Migrations\201706081553020_AddPrettyName.Designer.cs">
       <DependentUpon>201706081553020_AddPrettyName.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201706081755573_addLogs.cs" />
+    <Compile Include="Migrations\201706081755573_addLogs.Designer.cs">
+      <DependentUpon>201706081755573_addLogs.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\Log.cs" />
     <Compile Include="Models\Subscription.cs" />
     <Compile Include="Models\Telegraph\TelegraphContent.cs" />
     <Compile Include="Models\Telegraph\TelegraphResponse.cs" />
@@ -118,6 +123,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706081553020_AddPrettyName.resx">
       <DependentUpon>201706081553020_AddPrettyName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706081755573_addLogs.resx">
+      <DependentUpon>201706081755573_addLogs.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

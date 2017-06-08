@@ -118,5 +118,19 @@ namespace vk2tg.Services
                 }
             }
         }
+
+        public async Task AddLog(Subscription subscription, long postID, string link)
+        {
+            using(var db = new Vk2TgDbContext())
+            {
+                db.Logs.Add(new Log {
+                    DateTime = DateTime.UtcNow,
+                    Subscription = subscription,
+                    Link = link,
+                    PostId = postID
+                });
+                await db.SaveChangesAsync();
+            }
+        }
     }
 }

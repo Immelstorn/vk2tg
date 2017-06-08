@@ -11,6 +11,7 @@ namespace vk2tg.Data.Models
 
         public DbSet<User> Users { get; set; }
         public DbSet<Subscription> Subscriptions { get; set; }
+        public DbSet<Log> Logs { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
