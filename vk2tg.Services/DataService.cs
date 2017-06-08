@@ -119,13 +119,13 @@ namespace vk2tg.Services
             }
         }
 
-        public async Task AddLog(Subscription subscription, long postID, string link)
+        public async Task AddLog(int subscriptionId, long postID, string link)
         {
             using(var db = new Vk2TgDbContext())
             {
                 db.Logs.Add(new Log {
                     DateTime = DateTime.UtcNow,
-                    Subscription = subscription,
+                    SubscriptionId = subscriptionId,
                     Link = link,
                     PostId = postID
                 });

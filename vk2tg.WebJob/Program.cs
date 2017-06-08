@@ -45,7 +45,7 @@ namespace vk2tg.WebJob
                 foreach (var post in posts)
                 {
                     var link = _telegraphService.CreatePage(post, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
-                    await _dataService.AddLog(subscription, post.id, link);
+                    await _dataService.AddLog(subscription.Id, post.id, link);
                     foreach (var user in subscription.Users)
                     {
                         await _tgService.SendMessage(user.ChatId, link);
