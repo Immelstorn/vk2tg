@@ -23,7 +23,7 @@ namespace vk2tg.Services
         private const string UnsupportedAttachment = "Unsupported attachment";
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
         
-        public string CreatePage(WallPost post, string groupName)
+        public string CreatePage(WallPost post, string groupName, string groupPrettyName)
         {
             var doc = new HtmlDocument();
             var htmlBuilder = new StringBuilder(post.text);
@@ -71,14 +71,14 @@ namespace vk2tg.Services
             var client = new RestClient(TelegraphUrl);
             var request = new RestRequest(Method.POST);
             request.AddParameter("access_token", TelegraphAccessToken);
-            request.AddParameter("title", groupName);
-            request.AddParameter("author_name", groupName);
+            request.AddParameter("title", groupPrettyName);
+            request.AddParameter("author_name", groupPrettyName);
             request.AddParameter("author_url", string.Format(AuthorUrlTemplate, groupName, post.from_id, post.id));
             request.AddParameter("content", json);
             var response = client.Execute(request);
             var content = response.Content;
             var result = JsonConvert.DeserializeObject<TelegraphResponse>(content);
-            if (result.ok)
+            if (result.ok != "false")
             {
                 return result.result.url;
             }
