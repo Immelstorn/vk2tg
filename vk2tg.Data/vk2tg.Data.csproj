@@ -78,7 +78,12 @@
     <Compile Include="Migrations\201706081909430_changeSubscriptionToId.Designer.cs">
       <DependentUpon>201706081909430_changeSubscriptionToId.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201706091438373_addErrorLogs.cs" />
+    <Compile Include="Migrations\201706091438373_addErrorLogs.Designer.cs">
+      <DependentUpon>201706091438373_addErrorLogs.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\Log.cs" />
     <Compile Include="Models\Subscription.cs" />
     <Compile Include="Models\Telegraph\TelegraphContent.cs" />
@@ -133,6 +138,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706081909430_changeSubscriptionToId.resx">
       <DependentUpon>201706081909430_changeSubscriptionToId.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706091438373_addErrorLogs.resx">
+      <DependentUpon>201706091438373_addErrorLogs.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

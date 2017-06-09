@@ -132,5 +132,18 @@ namespace vk2tg.Services
                 await db.SaveChangesAsync();
             }
         }
+
+        public void AddErrorLog(Exception e)
+        {
+            using(var db = new Vk2TgDbContext())
+            {
+                db.ErrorLogs.Add(new ErrorLog {
+                    DateTime = DateTime.UtcNow,
+                    Message = e.Message,
+                    StackTrace = e.StackTrace
+                });
+                db.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -25,6 +25,11 @@ namespace vk2tg.WebJob
                     Trace.TraceError("================================================================");
                     Trace.TraceError(exception.Message);
                     Trace.TraceError(exception.StackTrace);
+                    try
+                    {
+                        _dataService.AddErrorLog(exception);
+                    }
+                    catch(Exception) { }
                 }
             }
             catch (Exception e)
@@ -32,6 +37,11 @@ namespace vk2tg.WebJob
                 Trace.TraceError("================================================================");
                 Trace.TraceError(e.Message);
                 Trace.TraceError(e.StackTrace);
+                try
+                {
+                    _dataService.AddErrorLog(e);
+                }
+                catch (Exception) { }
             }
         }
 
