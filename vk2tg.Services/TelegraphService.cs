@@ -18,6 +18,7 @@ namespace vk2tg.Services
         private const string TelegraphUrl = "https://api.telegra.ph/createPage";
         private static readonly string TelegraphAccessToken = ConfigurationManager.AppSettings["TelegraphAccessToken"];
         private const string ImgTemplate = "<img src='{0}'/>";
+        private const string HrefTemplate = "<a href='{0}'>{1}</a>";
         private const string VideoTemplate = "<a href='{0}'>Video: {0}</a>";
         private const string AudioTemplate = "<a href='{0}'>{1} - {2}</a>";
         private const string UnsupportedAttachment = "Unsupported attachment";
@@ -36,13 +37,7 @@ namespace vk2tg.Services
                     {
                         case "photo":
                             htmlBuilder.AppendLine("<br>");
-
-                            var imgurResult = UploadPhoto(attachment.photo.src_big);
-                            htmlBuilder.AppendLine(string.Format(ImgTemplate,
-                                                                     string.IsNullOrEmpty(imgurResult?.Link) 
-                                                                         ? attachment.photo.src_big 
-                                                                         : imgurResult.Link));
-
+                            htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.photo.src_big));
                             break;
                         case "video":
                             var embedLink = vkService.GetVideoInfo(attachment.video.owner_id, attachment.video.vid, attachment.video.access_key);
@@ -52,6 +47,11 @@ namespace vk2tg.Services
                         case "audio":
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(string.Format(AudioTemplate, attachment.audio.url, attachment.audio.artist, attachment.audio.title));
+                            break;
+                        case "link":
+                            htmlBuilder.AppendLine("<br>");
+                            htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.link.image_big));
+                            htmlBuilder.AppendLine(string.Format(HrefTemplate, attachment.link.url, attachment.link.title));
                             break;
                         default:
                             htmlBuilder.AppendLine("<br>");
@@ -84,6 +84,15 @@ namespace vk2tg.Services
             }
 
             return null;
+        }
+
+        private string UploadImageAndGetHtml(string imgUrl)
+        {
+            var imgurResult = UploadPhoto(imgUrl);
+            return string.Format(ImgTemplate,
+                                 string.IsNullOrEmpty(imgurResult?.Link)
+                                     ? imgUrl
+                                     : imgurResult.Link);
         }
 
         private static IImage UploadPhoto(string url)
