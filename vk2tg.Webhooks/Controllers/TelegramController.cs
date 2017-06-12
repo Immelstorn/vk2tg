@@ -144,8 +144,12 @@ namespace vk2tg.Webhooks.Controllers
                     return;
                 }
                 var post = _vkService.GetPosts(-group.gid, 0, 1).LastOrDefault();
-                var lastPostId = post?.id ?? 0; //if group is new and doesn't contain any posts
-                var subscribed = await _dataService.AddSubscription(-group.gid, group.screen_name, group.name, lastPostId, chatId);
+                if(post?.id == null)
+                {
+                    await _tgService.SendMessage(chatId, Texts.AccessDenied);
+                    return;
+                }
+                var subscribed = await _dataService.AddSubscription(-group.gid, group.screen_name, group.name, post.id, chatId);
 
                 await _tgService.SendMessage(chatId,
                                              subscribed

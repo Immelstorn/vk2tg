@@ -145,5 +145,18 @@ namespace vk2tg.Services
                 db.SaveChangesAsync();
             }
         }
+
+        public void AddErrorLog(string error)
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                db.ErrorLogs.Add(new ErrorLog
+                {
+                    DateTime = DateTime.UtcNow,
+                    Message = error
+                });
+                db.SaveChangesAsync();
+            }
+        }
     }
 }

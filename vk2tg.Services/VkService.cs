@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -14,7 +13,7 @@ namespace vk2tg.Services
     {
         private readonly string _accessTokens = ConfigurationManager.AppSettings["AccessTokens"];
         private readonly List<string> _tokens;
-
+        private readonly DataService _dataService = new DataService();
         private const string UrlFormat = "https://api.vk.com/method/{0}?access_token={1}&{2}";
 
         public VkService()
@@ -70,32 +69,13 @@ namespace vk2tg.Services
             foreach(var token in EnumerateTokens())
             {
                 var newPosts = GetListResult<WallPost>(method, token, parameters, httpMethod);
-                if(newPosts != null && newPosts.Any())
-                {
-                    return newPosts.Where(p => p.id > lastPostId && p.marked_as_ads != 1).OrderByDescending(p => p.id).Take(count).OrderBy(p => p.id).ToList();
-                }
+                return newPosts != null && newPosts.Any()
+                    ? newPosts.Where(p => p.id > lastPostId && p.marked_as_ads != 1).OrderByDescending(p => p.id).Take(count).OrderBy(p => p.id).ToList()
+                    : new List<WallPost>();
             }
 
             return new List<WallPost>();
         }
-
-//        private T GetOneResult<T>(string method, string token, string parameters, Method httpMethod)
-//        {
-//            var content = ExecuteRequest(method, token, parameters, httpMethod);
-//            var result = JsonConvert.DeserializeObject<T>(content);
-//            if (result?.response != null && result.response.Count > 1)
-//            {
-//                return result;
-//            }
-//            else
-//            {
-//                var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
-//                Debug.WriteLine(error);
-//                _tokens.Remove(token);
-//            }
-//
-//            return null;
-//        }
 
         private List<T> GetListResult<T>(string method, string token, string parameters, Method httpMethod)
         {
@@ -109,8 +89,11 @@ namespace vk2tg.Services
             }
 
             var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
-            Debug.WriteLine(error);
-            _tokens.Remove(token);
+            _dataService.AddErrorLog(content);
+            if (error.error.error_code != 15) //Access denied
+            {
+                _tokens.Remove(token);
+            }
 
             return null;
         }
