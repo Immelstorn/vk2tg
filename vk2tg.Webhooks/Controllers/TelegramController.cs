@@ -60,6 +60,8 @@ namespace vk2tg.Webhooks.Controllers
 
         private async Task ProcessUpdate(Update update)
         {
+            await _dataService.UpdateUserInfo(update.Message.Chat.Id, update.Message.Chat.Username, update.Message.Chat.FirstName, update.Message.Chat.LastName);
+
             var chatId = update.Message.Chat.Id;
             if(update.Message.Entities.Count(e => e.Type == MessageEntityType.BotCommand) == 1)
             {
@@ -101,7 +103,6 @@ namespace vk2tg.Webhooks.Controllers
                     }
                 }
             }
-
 
             await _tgService.SendMessage(update.Message.Chat.Id, Texts.PleaseUseOnlyOneCommand); 
         }
@@ -200,7 +201,7 @@ namespace vk2tg.Webhooks.Controllers
             }
             else
             {
-                await _dataService.RegisterOrUpdateUser(update.Message.Chat.Id, update.Message.Chat.Username);
+                await _dataService.RegisterUser(update.Message.Chat.Id, update.Message.Chat.Username);
                 await _tgService.SendMessage(update.Message.Chat.Id, Texts.Welcome); 
             }
         }

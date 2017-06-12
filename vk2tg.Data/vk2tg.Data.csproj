@@ -82,6 +82,10 @@
     <Compile Include="Migrations\201706091438373_addErrorLogs.Designer.cs">
       <DependentUpon>201706091438373_addErrorLogs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201706121214230_addUserFirstAndLastName.cs" />
+    <Compile Include="Migrations\201706121214230_addUserFirstAndLastName.Designer.cs">
+      <DependentUpon>201706121214230_addUserFirstAndLastName.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\ErrorLog.cs" />
     <Compile Include="Models\Log.cs" />
@@ -141,6 +145,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706091438373_addErrorLogs.resx">
       <DependentUpon>201706091438373_addErrorLogs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706121214230_addUserFirstAndLastName.resx">
+      <DependentUpon>201706121214230_addUserFirstAndLastName.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

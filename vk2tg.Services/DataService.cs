@@ -17,7 +17,7 @@ namespace vk2tg.Services
             }
         }
 
-        public async Task RegisterOrUpdateUser(long chatId, string username)
+        public async Task RegisterUser(long chatId, string username)
         {
             using(var db = new Vk2TgDbContext())
             {
@@ -30,10 +30,7 @@ namespace vk2tg.Services
                                      CreatedAt = DateTime.UtcNow
                                  });
                 }
-                else
-                {
-                    user.Username = username;
-                }
+               
                 await db.SaveChangesAsync();
             }
         }
@@ -156,6 +153,21 @@ namespace vk2tg.Services
                     Message = error
                 });
                 db.SaveChangesAsync();
+            }
+        }
+
+        public async Task UpdateUserInfo(long chatId, string username, string firstName, string lastName)
+        {
+            using(var db = new Vk2TgDbContext())
+            {
+                var user = await db.Users.Where(u => u.ChatId == chatId).FirstOrDefaultAsync();
+                if(user != null)
+                {
+                    user.Username = username;
+                    user.FirstName = firstName;
+                    user.LastName = lastName;
+                    await db.SaveChangesAsync();
+                }
             }
         }
     }
