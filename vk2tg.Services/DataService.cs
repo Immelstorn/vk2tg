@@ -86,7 +86,11 @@ namespace vk2tg.Services
                     return false;
                 }
 
-                user.Subscriptions.Remove(subscription);
+                subscription.Users.Remove(user);
+                if(!subscription.Users.Any())
+                {
+                    db.Subscriptions.Remove(subscription);
+                }
                 await db.SaveChangesAsync();
                 return true;
             }
@@ -96,7 +100,7 @@ namespace vk2tg.Services
         {
             using(var db = new Vk2TgDbContext())
             {
-                return await db.Subscriptions.Where(s => s.Users.Any()).Include(s => s.Users).ToListAsync();
+                return await db.Subscriptions.Include(s => s.Users).ToListAsync();
             }
         }
 
