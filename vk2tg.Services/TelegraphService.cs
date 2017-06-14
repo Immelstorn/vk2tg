@@ -96,6 +96,7 @@ namespace vk2tg.Services
 
         private async Task<string> UploadImageAndGetHtml(string imgUrl)
         {
+            await _dataService.AddTraceLog(imgUrl);
             var uploadResult = imgUrl == null ? null : await UploadToCloudinary(imgUrl);
             return string.Format(ImgTemplate,
                                  string.IsNullOrEmpty(uploadResult)
@@ -123,6 +124,8 @@ namespace vk2tg.Services
                 File = new FileDescription(url)
             };
             var uploadResult = await cloudinary.UploadAsync(uploadParams);
+            await _dataService.AddTraceLog(uploadResult.Uri.AbsoluteUri);
+
             return uploadResult.Uri.AbsoluteUri;
         }
 
