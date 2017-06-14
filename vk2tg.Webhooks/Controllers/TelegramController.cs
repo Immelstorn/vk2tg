@@ -7,6 +7,7 @@ using System.Web.Http;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using vk2tg.Data.Models;
+using vk2tg.Data.Models.DB;
 using vk2tg.Services;
 
 namespace vk2tg.Webhooks.Controllers

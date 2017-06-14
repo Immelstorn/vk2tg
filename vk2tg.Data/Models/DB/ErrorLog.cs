@@ -8,5 +8,6 @@ namespace vk2tg.Data.Models
         public DateTime DateTime { get; set; }
         public string Message { get; set; }
         public string StackTrace { get; set; }
+        public bool IsError { get; set; }
     }
 }

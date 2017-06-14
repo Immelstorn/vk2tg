@@ -86,15 +86,19 @@
     <Compile Include="Migrations\201706121214230_addUserFirstAndLastName.Designer.cs">
       <DependentUpon>201706121214230_addUserFirstAndLastName.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201706141217293_addIsErrorToErrorLogs.cs" />
+    <Compile Include="Migrations\201706141217293_addIsErrorToErrorLogs.Designer.cs">
+      <DependentUpon>201706141217293_addIsErrorToErrorLogs.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="Models\ErrorLog.cs" />
-    <Compile Include="Models\Log.cs" />
-    <Compile Include="Models\Subscription.cs" />
+    <Compile Include="Models\DB\ErrorLog.cs" />
+    <Compile Include="Models\DB\Log.cs" />
+    <Compile Include="Models\DB\Subscription.cs" />
     <Compile Include="Models\Telegraph\TelegraphContent.cs" />
     <Compile Include="Models\Telegraph\TelegraphResponse.cs" />
     <Compile Include="Models\Telegraph\TelegraphResult.cs" />
-    <Compile Include="Models\Texts.cs" />
-    <Compile Include="Models\User.cs" />
+    <Compile Include="Models\DB\Texts.cs" />
+    <Compile Include="Models\DB\User.cs" />
     <Compile Include="Models\Vk2TgDbContext.cs" />
     <Compile Include="Models\VK\Attachment.cs" />
     <Compile Include="Models\VK\Audio.cs" />
@@ -148,6 +152,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706121214230_addUserFirstAndLastName.resx">
       <DependentUpon>201706121214230_addUserFirstAndLastName.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706141217293_addIsErrorToErrorLogs.resx">
+      <DependentUpon>201706141217293_addIsErrorToErrorLogs.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -61,7 +61,7 @@ namespace vk2tg.Services
             return null;
         }
 
-        public List<WallPost> GetPosts(long subscriptionId, long lastPostId, int count = 10)
+        public List<WallPost> GetPosts(long subscriptionId, long lastPostId, int count = 5)
         {
             const string method = "wall.get";
             const Method httpMethod = Method.GET;

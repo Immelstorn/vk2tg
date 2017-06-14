@@ -1,4 +1,4 @@
-﻿namespace vk2tg.Data.Models
+﻿namespace vk2tg.Data.Models.DB
 {
     public class Texts
     {

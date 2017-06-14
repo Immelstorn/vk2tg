@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using vk2tg.Data.Models;
+using vk2tg.Data.Models.DB;
 
 namespace vk2tg.Services
 {
@@ -141,7 +142,8 @@ namespace vk2tg.Services
                 db.ErrorLogs.Add(new ErrorLog {
                     DateTime = DateTime.UtcNow,
                     Message = e.Message,
-                    StackTrace = e.StackTrace
+                    StackTrace = e.StackTrace,
+                    IsError = true
                 });
                 db.SaveChangesAsync();
             }
@@ -154,7 +156,22 @@ namespace vk2tg.Services
                 db.ErrorLogs.Add(new ErrorLog
                 {
                     DateTime = DateTime.UtcNow,
-                    Message = error
+                    Message = error,
+                    IsError = true
+                });
+                db.SaveChangesAsync();
+            }
+        }   
+
+        public void AddTraceLog(string message)
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                db.ErrorLogs.Add(new ErrorLog
+                {
+                    DateTime = DateTime.UtcNow,
+                    Message = message,
+                    IsError = false
                 });
                 db.SaveChangesAsync();
             }

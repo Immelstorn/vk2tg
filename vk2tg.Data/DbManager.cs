@@ -4,6 +4,7 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using vk2tg.Data.Models;
+using vk2tg.Data.Models.DB;
 
 namespace vk2tg.Data
 {
