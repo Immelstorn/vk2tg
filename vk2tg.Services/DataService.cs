@@ -180,30 +180,16 @@ namespace vk2tg.Services
 
         public async Task AddTraceLog(string message)
         {
-            using (var db = new Vk2TgDbContext())
-            {
-                db.ErrorLogs.Add(new ErrorLog
-                {
-                    DateTime = DateTime.UtcNow,
-                    Message = message,
-                    IsError = false
-                });
-                await db.SaveChangesAsync();
-            }
-        }
-
-        public void AddTraceLogSync(string message)
-        {
-            using (var db = new Vk2TgDbContext())
-            {
-                db.ErrorLogs.Add(new ErrorLog
-                {
-                    DateTime = DateTime.UtcNow,
-                    Message = message,
-                    IsError = false
-                });
-                db.SaveChanges();
-            }
+//            using (var db = new Vk2TgDbContext())
+//            {
+//                db.ErrorLogs.Add(new ErrorLog
+//                {
+//                    DateTime = DateTime.UtcNow,
+//                    Message = message,
+//                    IsError = false
+//                });
+//                await db.SaveChangesAsync();
+//            }
         }
 
         public async Task UpdateUserInfo(long chatId, string username, string firstName, string lastName)
