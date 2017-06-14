@@ -1,5 +1,4 @@
-﻿using System;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,24 +37,43 @@ namespace vk2tg.Services
 
             if (post.attachments != null && post.attachments.Any())
             {
-                foreach(var attachment in post.attachments)
+                await _dataService.AddTraceLog("Attachments: " + post.attachments?.Count);
+
+                foreach (var attachment in post.attachments)
                 {
-                    switch(attachment.type)
+                    await _dataService.AddTraceLog("attachment type" + attachment.type);
+
+                    switch (attachment.type)
                     {
                         case "photo":
+                            await _dataService.AddTraceLog("attachment.photo.src_big" + attachment.photo.src_big);
+
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.photo.src_big));
                             break;
                         case "video":
+                            await _dataService.AddTraceLog("attachment.video.owner_id" + attachment.video.owner_id);
+                            await _dataService.AddTraceLog("attachment.video.video" + attachment.video.vid);
+                            await _dataService.AddTraceLog("attachment.video.access_key" + attachment.video.access_key);
+
                             var embedLink = vkService.GetVideoInfo(attachment.video.owner_id, attachment.video.vid, attachment.video.access_key);
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(string.Format(VideoTemplate, embedLink));
                             break;
                         case "audio":
+                            await _dataService.AddTraceLog("attachment.audio.url" + attachment.audio.url);
+                            await _dataService.AddTraceLog("attachment.audio.artist" + attachment.audio.artist);
+                            await _dataService.AddTraceLog("attachment.audio.title" + attachment.audio.title);
+
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(string.Format(AudioTemplate, attachment.audio.url, attachment.audio.artist, attachment.audio.title));
                             break;
                         case "link":
+                            await _dataService.AddTraceLog("attachment.link.image_big" + attachment.link.image_big);
+                            await _dataService.AddTraceLog("attachment.link.image_src" + attachment.link.image_src);
+                            await _dataService.AddTraceLog("attachment.link.url" + attachment.link.url);
+                            await _dataService.AddTraceLog("attachment.link.title" + attachment.link.title);
+
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.link.image_big ?? attachment.link.image_src));
                             htmlBuilder.AppendLine(string.Format(HrefTemplate, attachment.link.url, attachment.link.title));

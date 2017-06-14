@@ -45,7 +45,7 @@ namespace vk2tg.WebJob
             }
         }
 
-        private static async Task AsyncMain()
+        private static async Task AsyncMain()   
         {
             await _dataService.AddTraceLog("Sync started");
             var subscriptions = await _dataService.GetSubscriptionsToCheck();
