@@ -60,19 +60,47 @@ namespace vk2tg.WebJob
 
                 foreach (var post in posts)
                 {
-                    await _dataService.AddTraceLog("Processing post: " + post.id);
-                    var link = _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
-                    await _dataService.AddLog(subscription.Id, post.id, link);
-                    await _dataService.AddTraceLog("Sending to users: " + subscription.Users.Count);
-
-                    foreach (var user in subscription.Users)
+                    try
                     {
-                        await _dataService.AddTraceLog("Sending to user: " + user.ChatId);
-                        await _tgService.SendMessage(user.ChatId, link);
-                    }
+                        await _dataService.AddTraceLog("Processing post: " + post.id);
+                        var link = await _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
+                        await _dataService.AddLog(subscription.Id, post.id, link);
+                        await _dataService.AddTraceLog("Sending to users: " + subscription.Users.Count);
 
-                    await _dataService.AddTraceLog("Set last post for subscription " + subscription.SubscriptionName + " - " + post.id);
-                    await _dataService.SetLastPost(subscription.SubscriptionId, post.id);
+                        foreach (var user in subscription.Users)
+                        {
+                            await _dataService.AddTraceLog("Sending to user: " + user.ChatId);
+                            await _tgService.SendMessage(user.ChatId, link);
+                        }
+
+                        await _dataService.AddTraceLog("Set last post for subscription " + subscription.SubscriptionName + " - " + post.id);
+                        await _dataService.SetLastPost(subscription.SubscriptionId, post.id);
+                    }
+                    catch (AggregateException a)
+                    {
+                        foreach (var exception in a.InnerExceptions)
+                        {
+                            Trace.TraceError("================================================================");
+                            Trace.TraceError(exception.Message);
+                            Trace.TraceError(exception.StackTrace);
+                            try
+                            {
+                                await _dataService.AddErrorLog(exception);
+                            }
+                            catch (Exception) { }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Trace.TraceError("================================================================");
+                        Trace.TraceError(e.Message);
+                        Trace.TraceError(e.StackTrace);
+                        try
+                        {
+                           await _dataService.AddErrorLog(e);
+                        }
+                        catch (Exception) { }
+                    }
                 }
             }
             await _dataService.AddTraceLog("Sync finished");

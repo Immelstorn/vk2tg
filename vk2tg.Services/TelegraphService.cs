@@ -1,6 +1,7 @@
 ﻿using System.Configuration;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using HtmlAgilityPack;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
@@ -23,12 +24,14 @@ namespace vk2tg.Services
         private const string AudioTemplate = "<a href='{0}'>{1} - {2}</a>";
         private const string UnsupportedAttachment = "Unsupported attachment";
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
-        
-        public string CreatePage(WallPost post, string groupName, string groupPrettyName)
+
+
+        public async Task<string> CreatePage(WallPost post, string groupName, string groupPrettyName)
         {
             var doc = new HtmlDocument();
             var htmlBuilder = new StringBuilder(post.text);
             var vkService = new VkService();
+
             if (post.attachments != null && post.attachments.Any())
             {
                 foreach(var attachment in post.attachments)
@@ -60,6 +63,7 @@ namespace vk2tg.Services
                     }
                 }
             }
+
             doc.LoadHtml(htmlBuilder.ToString());
             var jArray = new JArray();
             foreach (var node in doc.DocumentNode.ChildNodes)
@@ -67,6 +71,7 @@ namespace vk2tg.Services
                 jArray.Add(DomToNode(node));
             }
             var json = jArray.ToString();
+
 
             var client = new RestClient(TelegraphUrl);
             var request = new RestRequest(Method.POST);
