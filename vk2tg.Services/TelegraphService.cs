@@ -1,8 +1,10 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using Imgur.API;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
 using Imgur.API.Models;
@@ -24,6 +26,7 @@ namespace vk2tg.Services
         private const string AudioTemplate = "<a href='{0}'>{1} - {2}</a>";
         private const string UnsupportedAttachment = "Unsupported attachment";
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
+        private static readonly DataService _dataService = new DataService();
 
 
         public async Task<string> CreatePage(WallPost post, string groupName, string groupPrettyName)
@@ -31,6 +34,7 @@ namespace vk2tg.Services
             var doc = new HtmlDocument();
             var htmlBuilder = new StringBuilder(post.text);
             var vkService = new VkService();
+            await _dataService.AddTraceLog("Starting if with foreach");
 
             if (post.attachments != null && post.attachments.Any())
             {
@@ -53,7 +57,7 @@ namespace vk2tg.Services
                             break;
                         case "link":
                             htmlBuilder.AppendLine("<br>");
-                            htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.link.image_big));
+                            htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.link.image_big ?? attachment.link.image_src));
                             htmlBuilder.AppendLine(string.Format(HrefTemplate, attachment.link.url, attachment.link.title));
                             break;
                         default:
@@ -63,6 +67,7 @@ namespace vk2tg.Services
                     }
                 }
             }
+            await _dataService.AddTraceLog("Html: " + htmlBuilder.ToString());
 
             doc.LoadHtml(htmlBuilder.ToString());
             var jArray = new JArray();
@@ -72,6 +77,7 @@ namespace vk2tg.Services
             }
             var json = jArray.ToString();
 
+            await _dataService.AddTraceLog("Json: " + json);
 
             var client = new RestClient(TelegraphUrl);
             var request = new RestRequest(Method.POST);
@@ -81,6 +87,7 @@ namespace vk2tg.Services
             request.AddParameter("author_url", string.Format(AuthorUrlTemplate, groupName, post.from_id, post.id));
             request.AddParameter("content", json);
             var response = client.Execute(request);
+            await _dataService.AddTraceLog("Telegraph response: " + response);
             var content = response.Content;
             var result = JsonConvert.DeserializeObject<TelegraphResponse>(content);
             if (result.ok != "false")
@@ -93,7 +100,7 @@ namespace vk2tg.Services
 
         private string UploadImageAndGetHtml(string imgUrl)
         {
-            var imgurResult = UploadPhoto(imgUrl);
+            var imgurResult = imgUrl == null ? null : UploadPhoto(imgUrl);
             return string.Format(ImgTemplate,
                                  string.IsNullOrEmpty(imgurResult?.Link)
                                      ? imgUrl
@@ -104,8 +111,17 @@ namespace vk2tg.Services
         {
             var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
             var endpoint = new ImageEndpoint(imgur);
-            var result = endpoint.UploadImageUrlAsync(url).Result;
-            return result;
+            try
+            {
+                var result = endpoint.UploadImageUrlAsync(url).Result;
+                return result;
+            }
+            catch(ImgurException e)
+            {
+                _dataService.AddErrorLogSync(e);
+            }
+
+            return null;
         }
 
         private static object DomToNode(HtmlNode node)
