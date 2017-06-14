@@ -116,7 +116,7 @@ namespace vk2tg.Webhooks.Controllers
             }
             else
             {
-                var group = _vkService.GetGroupInfo(result);
+                var group = await _vkService.GetGroupInfo(result);
                 if (group == null)
                 {
                     await _tgService.SendMessage(chatId, string.Format(Texts.GroupIsNotFound, result));
@@ -139,7 +139,7 @@ namespace vk2tg.Webhooks.Controllers
             }
             else
             {
-                var group = _vkService.GetGroupInfo(result); 
+                var group = await _vkService.GetGroupInfo(result); 
                 if(group == null)
                 {
                     await _tgService.SendMessage(chatId, string.Format(Texts.GroupIsNotFound, result)); 

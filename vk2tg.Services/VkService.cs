@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
 using vk2tg.Data.Models.VK;
@@ -37,7 +38,7 @@ namespace vk2tg.Services
             return null;
         }
 
-        public GroupsResponse GetGroupInfo(string groupName)
+        public async Task<GroupsResponse> GetGroupInfo(string groupName)
         {
             const string method = "groups.getById";
             const Method httpMethod = Method.GET;
@@ -52,7 +53,7 @@ namespace vk2tg.Services
                     return result.response.First();
                 }
 
-                _dataService.AddErrorLog(content);
+                await _dataService.AddErrorLog(content);
 //                var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
                 Trace.WriteLine(content);
                 _tokens.Remove(token);
