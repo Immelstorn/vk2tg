@@ -46,7 +46,6 @@ namespace vk2tg.WebJob
             }
         }
 
-
         private static async Task AsyncMain()   
         {
             await _dataService.AddTraceLog("Sync started");
@@ -65,7 +64,22 @@ namespace vk2tg.WebJob
 
                         foreach (var user in subscription.Users)
                         {
-                            await _tgService.SendMessage(user.ChatId, link);
+                            try
+                            {
+                                await _tgService.SendMessage(user.ChatId, link);
+                            }
+                            catch(Exception e)
+                            {
+                                if(e.Message.Equals("Forbidden: bot was blocked by the user"))
+                                {
+                                    await _dataService.AddErrorLog(e);
+                                    await _dataService.AddTraceLog("User: " + user.ChatId);
+                                }
+                                else
+                                {
+                                    throw;
+                                }
+                            }
                         }
 
                         await _dataService.SetLastPost(subscription.SubscriptionId, post.id);
