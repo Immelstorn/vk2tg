@@ -135,7 +135,7 @@ namespace vk2tg.Services
             }
         }
 
-        public void AddErrorLog(Exception e)
+        public async Task AddErrorLog(Exception e)
         {
             using(var db = new Vk2TgDbContext())
             {
@@ -145,11 +145,25 @@ namespace vk2tg.Services
                     StackTrace = e.StackTrace,
                     IsError = true
                 });
-                db.SaveChangesAsync();
+                await db.SaveChangesAsync();
             }
         }
 
-        public void AddErrorLog(string error)
+        public void AddErrorLogSync(Exception e)
+        {
+            using(var db = new Vk2TgDbContext())
+            {
+                db.ErrorLogs.Add(new ErrorLog {
+                    DateTime = DateTime.UtcNow,
+                    Message = e.Message,
+                    StackTrace = e.StackTrace,
+                    IsError = true
+                });
+                db.SaveChanges();
+            }
+        }
+
+        public async Task AddErrorLog(string error)
         {
             using (var db = new Vk2TgDbContext())
             {
@@ -159,22 +173,23 @@ namespace vk2tg.Services
                     Message = error,
                     IsError = true
                 });
-                db.SaveChangesAsync();
+               await  db.SaveChangesAsync();
             }
         }   
 
-        public void AddTraceLog(string message)
+
+        public async Task AddTraceLog(string message)
         {
-            using (var db = new Vk2TgDbContext())
-            {
-                db.ErrorLogs.Add(new ErrorLog
-                {
-                    DateTime = DateTime.UtcNow,
-                    Message = message,
-                    IsError = false
-                });
-                db.SaveChangesAsync();
-            }
+//            using (var db = new Vk2TgDbContext())
+//            {
+//                db.ErrorLogs.Add(new ErrorLog
+//                {
+//                    DateTime = DateTime.UtcNow,
+//                    Message = message,
+//                    IsError = false
+//                });
+//                await db.SaveChangesAsync();
+//            }
         }
 
         public async Task UpdateUserInfo(long chatId, string username, string firstName, string lastName)

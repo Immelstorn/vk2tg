@@ -27,7 +27,7 @@ namespace vk2tg.WebJob
                     Trace.TraceError(exception.StackTrace);
                     try
                     {
-                        _dataService.AddErrorLog(exception);
+                        _dataService.AddErrorLogSync(exception);
                     }
                     catch(Exception) { }
                 }
@@ -39,7 +39,7 @@ namespace vk2tg.WebJob
                 Trace.TraceError(e.StackTrace);
                 try
                 {
-                    _dataService.AddErrorLog(e);
+                    _dataService.AddErrorLogSync(e);
                 }
                 catch (Exception) { }
             }
@@ -47,35 +47,35 @@ namespace vk2tg.WebJob
 
         private static async Task AsyncMain()
         {
-            _dataService.AddTraceLog("Sync started");
+            await _dataService.AddTraceLog("Sync started");
             var subscriptions = await _dataService.GetSubscriptionsToCheck();
-            _dataService.AddTraceLog("Subscriptions: " + subscriptions.Count);
+            await _dataService.AddTraceLog("Subscriptions: " + subscriptions.Count);
 
             foreach (var subscription in subscriptions)
             {
-                _dataService.AddTraceLog("Processing subscription: " + subscription.SubscriptionName);
+                await _dataService.AddTraceLog("Processing subscription: " + subscription.SubscriptionName);
 
                 var posts = _vkService.GetPosts(subscription.SubscriptionId, subscription.LastPostId);
-                _dataService.AddTraceLog("Posts: " + posts.Count);
+                await _dataService.AddTraceLog("Posts: " + posts.Count);
 
                 foreach (var post in posts)
                 {
-                    _dataService.AddTraceLog("Processing post: " + post.id);
+                    await _dataService.AddTraceLog("Processing post: " + post.id);
                     var link = _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
                     await _dataService.AddLog(subscription.Id, post.id, link);
-                    _dataService.AddTraceLog("Sending to users: " + subscription.Users.Count);
+                    await _dataService.AddTraceLog("Sending to users: " + subscription.Users.Count);
 
                     foreach (var user in subscription.Users)
                     {
-                        _dataService.AddTraceLog("Sending to user: " + user.ChatId);
+                        await _dataService.AddTraceLog("Sending to user: " + user.ChatId);
                         await _tgService.SendMessage(user.ChatId, link);
                     }
 
-                    _dataService.AddTraceLog("Set last post for subscription " + subscription.SubscriptionName + " - " + post.id);
+                    await _dataService.AddTraceLog("Set last post for subscription " + subscription.SubscriptionName + " - " + post.id);
                     await _dataService.SetLastPost(subscription.SubscriptionId, post.id);
                 }
             }
-            _dataService.AddTraceLog("Sync finished");
+            await _dataService.AddTraceLog("Sync finished");
         }
     }
 }

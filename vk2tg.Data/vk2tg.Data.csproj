@@ -49,7 +49,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DbManager.cs" />
     <Compile Include="Migrations\201705261714585_init.cs" />
     <Compile Include="Migrations\201705261714585_init.Designer.cs">
       <DependentUpon>201705261714585_init.cs</DependentUpon>
