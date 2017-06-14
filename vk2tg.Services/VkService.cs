@@ -52,8 +52,9 @@ namespace vk2tg.Services
                     return result.response.First();
                 }
 
-                var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
-                Debug.WriteLine(error);
+                _dataService.AddErrorLog(content);
+//                var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
+                Trace.WriteLine(content);
                 _tokens.Remove(token);
             }
 
@@ -88,8 +89,10 @@ namespace vk2tg.Services
                 return t;
             }
 
-            var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
             _dataService.AddErrorLog(content);
+            Trace.WriteLine(content);
+
+            var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
             if (error.error.error_code != 15) //Access denied
             {
                 _tokens.Remove(token);
