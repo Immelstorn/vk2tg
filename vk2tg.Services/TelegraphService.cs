@@ -2,11 +2,9 @@
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using HtmlAgilityPack;
-using Imgur.API;
-using Imgur.API.Authentication.Impl;
-using Imgur.API.Endpoints.Impl;
-using Imgur.API.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
@@ -45,7 +43,7 @@ namespace vk2tg.Services
                         case "photo":
 
                             htmlBuilder.AppendLine("<br>");
-                            htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.photo.src_big));
+                            htmlBuilder.AppendLine(await UploadImageAndGetHtml(attachment.photo.src_big));
                             break;
                         case "video":
                             var embedLink = vkService.GetVideoInfo(attachment.video.owner_id, attachment.video.vid, attachment.video.access_key);
@@ -58,7 +56,7 @@ namespace vk2tg.Services
                             break;
                         case "link":
                             htmlBuilder.AppendLine("<br>");
-                            htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.link.image_big ?? attachment.link.image_src));
+                            htmlBuilder.AppendLine(await UploadImageAndGetHtml(attachment.link.image_big ?? attachment.link.image_src));
                             htmlBuilder.AppendLine(string.Format(HrefTemplate, attachment.link.url, attachment.link.title));
                             break;
                         default:
@@ -96,48 +94,60 @@ namespace vk2tg.Services
             return null;
         }
 
-        private string UploadImageAndGetHtml(string imgUrl)
+        private async Task<string> UploadImageAndGetHtml(string imgUrl)
         {
-            var imgurResult = imgUrl == null ? null : UploadPhoto(imgUrl);
+            var uploadResult = imgUrl == null ? null : await UploadToCloudinary(imgUrl);
             return string.Format(ImgTemplate,
-                                 string.IsNullOrEmpty(imgurResult?.Link)
+                                 string.IsNullOrEmpty(uploadResult)
                                      ? imgUrl
-                                     : imgurResult.Link);
+                                     : uploadResult);
         }
 
-        private static void GetImgurLimit()
+//        private static void GetImgurLimit()
+//        {
+//            var client = new RestClient("https://api.imgur.com/3/credits");
+//            var request = new RestRequest();
+//            request.AddHeader("Authorization", "Client-ID " + ConfigurationManager.AppSettings["ImgurClientId"]);
+//            var response = client.Execute(request);
+//            var content = response.Content;
+//            _dataService.AddTraceLogSync(content);
+//        }
+
+        private async Task<string> UploadToCloudinary(string url)
         {
-            var client = new RestClient("https://api.imgur.com/3/credits");
-            var request = new RestRequest();
-            request.AddHeader("Authorization", "Client-ID " + ConfigurationManager.AppSettings["ImgurClientId"]);
-            var response = client.Execute(request);
-            var content = response.Content;
-            _dataService.AddTraceLogSync(content);
+            var account = new Account(ConfigurationManager.AppSettings["CloudinaryCloud"], ConfigurationManager.AppSettings["CloudinaryApiKey"], ConfigurationManager.AppSettings["CloudinaryApiSecret"]);
+
+            var cloudinary = new Cloudinary(account);
+            var uploadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(url)
+            };
+            var uploadResult = await cloudinary.UploadAsync(uploadParams);
+            return uploadResult.Uri.AbsoluteUri;
         }
 
-
-        private static IImage UploadPhoto(string url)
-        {
-            var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
-            var endpoint = new ImageEndpoint(imgur);
-            var limit = endpoint.ApiClient.RateLimit;
-            GetImgurLimit();
-            try
-            {
-                var result = endpoint.UploadImageUrlAsync(url).Result;
-                return result;
-            }
-            catch(ImgurException e)
-            {
-                _dataService.AddErrorLogSync(e);
-                if(e.InnerException != null)
-                {
-                    _dataService.AddErrorLogSync(e);
-                }
-            }
-
-            return null;
-        }
+//        private static IImage UploadPhoto(string url)
+//        {
+//            var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
+//            var endpoint = new ImageEndpoint(imgur);
+//            var limit = endpoint.ApiClient.RateLimit;
+//            GetImgurLimit();
+//            try
+//            {
+//                var result = endpoint.UploadImageUrlAsync(url).Result;
+//                return result;
+//            }
+//            catch(ImgurException e)
+//            {
+//                _dataService.AddErrorLogSync(e);
+//                if(e.InnerException != null)
+//                {
+//                    _dataService.AddErrorLogSync(e);
+//                }
+//            }
+//
+//            return null;
+//        }
 
         private static object DomToNode(HtmlNode node)
         {
