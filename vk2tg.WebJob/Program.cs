@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using vk2tg.Services;
 
@@ -45,44 +46,34 @@ namespace vk2tg.WebJob
             }
         }
 
+
         private static async Task AsyncMain()   
         {
             await _dataService.AddTraceLog("Sync started");
             var subscriptions = await _dataService.GetSubscriptionsToCheck();
-            await _dataService.AddTraceLog("Subscriptions: " + subscriptions.Count);
 
             foreach (var subscription in subscriptions)
             {
-                await _dataService.AddTraceLog("Processing subscription: " + subscription.SubscriptionName);
-
-                var posts = _vkService.GetPosts(subscription.SubscriptionId, subscription.LastPostId);
-                await _dataService.AddTraceLog("Posts: " + posts.Count);
+                var posts = await _vkService.GetPosts(subscription.SubscriptionId, subscription.LastPostId);
 
                 foreach (var post in posts)
                 {
                     try
                     {
-                        await _dataService.AddTraceLog("Processing post: " + post.id);
                         var link = await _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
                         await _dataService.AddLog(subscription.Id, post.id, link);
-                        await _dataService.AddTraceLog("Sending to users: " + subscription.Users.Count);
 
                         foreach (var user in subscription.Users)
                         {
-                            await _dataService.AddTraceLog("Sending to user: " + user.ChatId);
                             await _tgService.SendMessage(user.ChatId, link);
                         }
 
-                        await _dataService.AddTraceLog("Set last post for subscription " + subscription.SubscriptionName + " - " + post.id);
                         await _dataService.SetLastPost(subscription.SubscriptionId, post.id);
                     }
                     catch (AggregateException a)
                     {
                         foreach (var exception in a.InnerExceptions)
                         {
-                            Trace.TraceError("================================================================");
-                            Trace.TraceError(exception.Message);
-                            Trace.TraceError(exception.StackTrace);
                             try
                             {
                                 await _dataService.AddErrorLog(exception);
@@ -92,9 +83,6 @@ namespace vk2tg.WebJob
                     }
                     catch (Exception e)
                     {
-                        Trace.TraceError("================================================================");
-                        Trace.TraceError(e.Message);
-                        Trace.TraceError(e.StackTrace);
                         try
                         {
                            await _dataService.AddErrorLog(e);

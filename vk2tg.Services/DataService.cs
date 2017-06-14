@@ -192,6 +192,20 @@ namespace vk2tg.Services
             }
         }
 
+        public void AddTraceLogSync(string message)
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                db.ErrorLogs.Add(new ErrorLog
+                {
+                    DateTime = DateTime.UtcNow,
+                    Message = message,
+                    IsError = false
+                });
+                db.SaveChanges();
+            }
+        }
+
         public async Task UpdateUserInfo(long chatId, string username, string firstName, string lastName)
         {
             using(var db = new Vk2TgDbContext())

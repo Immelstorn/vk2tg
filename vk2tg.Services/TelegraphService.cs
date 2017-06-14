@@ -33,47 +33,30 @@ namespace vk2tg.Services
             var doc = new HtmlDocument();
             var htmlBuilder = new StringBuilder(post.text);
             var vkService = new VkService();
-            await _dataService.AddTraceLog("Starting if with foreach");
 
             if (post.attachments != null && post.attachments.Any())
             {
-                await _dataService.AddTraceLog("Attachments: " + post.attachments?.Count);
 
                 foreach (var attachment in post.attachments)
                 {
-                    await _dataService.AddTraceLog("attachment type" + attachment.type);
 
                     switch (attachment.type)
                     {
                         case "photo":
-                            await _dataService.AddTraceLog("attachment.photo.src_big" + attachment.photo.src_big);
 
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.photo.src_big));
                             break;
                         case "video":
-                            await _dataService.AddTraceLog("attachment.video.owner_id" + attachment.video.owner_id);
-                            await _dataService.AddTraceLog("attachment.video.video" + attachment.video.vid);
-                            await _dataService.AddTraceLog("attachment.video.access_key" + attachment.video.access_key);
-
                             var embedLink = vkService.GetVideoInfo(attachment.video.owner_id, attachment.video.vid, attachment.video.access_key);
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(string.Format(VideoTemplate, embedLink));
                             break;
                         case "audio":
-                            await _dataService.AddTraceLog("attachment.audio.url" + attachment.audio.url);
-                            await _dataService.AddTraceLog("attachment.audio.artist" + attachment.audio.artist);
-                            await _dataService.AddTraceLog("attachment.audio.title" + attachment.audio.title);
-
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(string.Format(AudioTemplate, attachment.audio.url, attachment.audio.artist, attachment.audio.title));
                             break;
                         case "link":
-                            await _dataService.AddTraceLog("attachment.link.image_big" + attachment.link.image_big);
-                            await _dataService.AddTraceLog("attachment.link.image_src" + attachment.link.image_src);
-                            await _dataService.AddTraceLog("attachment.link.url" + attachment.link.url);
-                            await _dataService.AddTraceLog("attachment.link.title" + attachment.link.title);
-
                             htmlBuilder.AppendLine("<br>");
                             htmlBuilder.AppendLine(UploadImageAndGetHtml(attachment.link.image_big ?? attachment.link.image_src));
                             htmlBuilder.AppendLine(string.Format(HrefTemplate, attachment.link.url, attachment.link.title));
@@ -85,7 +68,6 @@ namespace vk2tg.Services
                     }
                 }
             }
-            await _dataService.AddTraceLog("Html: " + htmlBuilder.ToString());
 
             doc.LoadHtml(htmlBuilder.ToString());
             var jArray = new JArray();
@@ -95,7 +77,6 @@ namespace vk2tg.Services
             }
             var json = jArray.ToString();
 
-            await _dataService.AddTraceLog("Json: " + json);
 
             var client = new RestClient(TelegraphUrl);
             var request = new RestRequest(Method.POST);
@@ -105,7 +86,6 @@ namespace vk2tg.Services
             request.AddParameter("author_url", string.Format(AuthorUrlTemplate, groupName, post.from_id, post.id));
             request.AddParameter("content", json);
             var response = client.Execute(request);
-            await _dataService.AddTraceLog("Telegraph response: " + response);
             var content = response.Content;
             var result = JsonConvert.DeserializeObject<TelegraphResponse>(content);
             if (result.ok != "false")
@@ -125,10 +105,23 @@ namespace vk2tg.Services
                                      : imgurResult.Link);
         }
 
+        private static void GetImgurLimit()
+        {
+            var client = new RestClient("https://api.imgur.com/3/credits");
+            var request = new RestRequest();
+            request.AddHeader("Authorization", "Client-ID " + ConfigurationManager.AppSettings["ImgurClientId"]);
+            var response = client.Execute(request);
+            var content = response.Content;
+            _dataService.AddTraceLogSync(content);
+        }
+
+
         private static IImage UploadPhoto(string url)
         {
             var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
             var endpoint = new ImageEndpoint(imgur);
+            var limit = endpoint.ApiClient.RateLimit;
+            GetImgurLimit();
             try
             {
                 var result = endpoint.UploadImageUrlAsync(url).Result;
@@ -137,6 +130,10 @@ namespace vk2tg.Services
             catch(ImgurException e)
             {
                 _dataService.AddErrorLogSync(e);
+                if(e.InnerException != null)
+                {
+                    _dataService.AddErrorLogSync(e);
+                }
             }
 
             return null;

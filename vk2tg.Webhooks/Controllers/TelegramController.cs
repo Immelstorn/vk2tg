@@ -145,7 +145,7 @@ namespace vk2tg.Webhooks.Controllers
                     await _tgService.SendMessage(chatId, string.Format(Texts.GroupIsNotFound, result)); 
                     return;
                 }
-                var post = _vkService.GetPosts(-group.gid, 0, 1).LastOrDefault();
+                var post = (await _vkService.GetPosts(-group.gid, 0, 1)).FirstOrDefault();
                 if(post?.id == null)
                 {
                     await _tgService.SendMessage(chatId, Texts.AccessDenied);
