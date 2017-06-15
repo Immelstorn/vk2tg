@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Threading;
+using System.Linq;
 using System.Threading.Tasks;
 using vk2tg.Services;
 
@@ -62,7 +62,7 @@ namespace vk2tg.WebJob
                         var link = await _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
                         await _dataService.AddLog(subscription.Id, post.id, link);
 
-                        foreach (var user in subscription.Users)
+                        foreach(var user in subscription.Users.Where(u => !u.HasBlocked))
                         {
                             try
                             {
@@ -72,8 +72,7 @@ namespace vk2tg.WebJob
                             {
                                 if(e.Message.Equals("Forbidden: bot was blocked by the user"))
                                 {
-                                    await _dataService.AddErrorLog(e);
-                                    await _dataService.AddTraceLog("User: " + user.ChatId);
+                                    await _dataService.Block(user.ChatId);
                                 }
                                 else
                                 {

@@ -23,7 +23,6 @@ namespace vk2tg.Services
         private const string AudioTemplate = "<a href='{0}'>{1} - {2}</a>";
         private const string UnsupportedAttachment = "Unsupported attachment";
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
-        private static readonly DataService _dataService = new DataService();
 
 
         public async Task<string> CreatePage(WallPost post, string groupName, string groupPrettyName)

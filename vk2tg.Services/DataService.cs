@@ -101,7 +101,7 @@ namespace vk2tg.Services
         {
             using(var db = new Vk2TgDbContext())
             {
-                return await db.Subscriptions.Include(s => s.Users).ToListAsync();
+                return await db.Subscriptions.Where(s => s.Users.Any(u => !u.HasBlocked)).Include(s => s.Users).ToListAsync();
             }
         }
 
@@ -202,6 +202,20 @@ namespace vk2tg.Services
                     user.Username = username;
                     user.FirstName = firstName;
                     user.LastName = lastName;
+                    user.HasBlocked = false;
+                    await db.SaveChangesAsync();
+                }
+            }
+        }
+
+        public async Task Block(long chatId)
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                var user = await db.Users.Where(u => u.ChatId == chatId).FirstOrDefaultAsync();
+                if (user != null)
+                {
+                    user.HasBlocked = true;
                     await db.SaveChangesAsync();
                 }
             }
