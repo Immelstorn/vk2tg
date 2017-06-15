@@ -89,6 +89,10 @@
     <Compile Include="Migrations\201706141217293_addIsErrorToErrorLogs.Designer.cs">
       <DependentUpon>201706141217293_addIsErrorToErrorLogs.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201706151749054_userHasBlocked.cs" />
+    <Compile Include="Migrations\201706151749054_userHasBlocked.Designer.cs">
+      <DependentUpon>201706151749054_userHasBlocked.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\DB\ErrorLog.cs" />
     <Compile Include="Models\DB\Log.cs" />
@@ -154,6 +158,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706141217293_addIsErrorToErrorLogs.resx">
       <DependentUpon>201706141217293_addIsErrorToErrorLogs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201706151749054_userHasBlocked.resx">
+      <DependentUpon>201706151749054_userHasBlocked.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
