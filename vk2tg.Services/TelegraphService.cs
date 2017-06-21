@@ -23,6 +23,7 @@ namespace vk2tg.Services
         private const string AudioTemplate = "<a href='{0}'>{1} - {2}</a>";
         private const string UnsupportedAttachment = "Unsupported attachment";
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
+        private readonly DataService _dataService = new DataService();
 
 
         public async Task<string> CreatePage(WallPost post, string groupName, string groupPrettyName)
@@ -42,7 +43,15 @@ namespace vk2tg.Services
                         case "photo":
 
                             htmlBuilder.AppendLine("<br>");
-                            htmlBuilder.AppendLine(await UploadImageAndGetHtml(attachment.photo.src_big));
+                            try
+                            {
+                                htmlBuilder.AppendLine(await UploadImageAndGetHtml(attachment.photo.src_big));
+                            }
+                            catch
+                            {
+                                await _dataService.AddTraceLog($"CreatePage. post.id:{post.id} groupName:{groupName} attachment.photo.src_big:{attachment.photo.src_big}");
+                                throw;
+                            }
                             break;
                         case "video":
                             var embedLink = await vkService.GetVideoInfo(attachment.video.owner_id, attachment.video.vid, attachment.video.access_key);
@@ -55,7 +64,15 @@ namespace vk2tg.Services
                             break;
                         case "link":
                             htmlBuilder.AppendLine("<br>");
-                            htmlBuilder.AppendLine(await UploadImageAndGetHtml(attachment.link.image_big ?? attachment.link.image_src));
+                            try
+                            {
+                                htmlBuilder.AppendLine(await UploadImageAndGetHtml(attachment.link.image_big ?? attachment.link.image_src));
+                            }
+                            catch
+                            {
+                                await _dataService.AddTraceLog($"CreatePage. post.id:{post.id} groupName:{groupName} attachment.link.image_big:{attachment.link.image_big} attachment.link.image_src:{attachment.link.image_src}");
+                                throw;
+                            }
                             htmlBuilder.AppendLine(string.Format(HrefTemplate, attachment.link.url, attachment.link.title));
                             break;
                         default:
@@ -114,19 +131,23 @@ namespace vk2tg.Services
 
         private async Task<string> UploadToCloudinary(string url)
         {
-            var account = new Account(ConfigurationManager.AppSettings["CloudinaryCloud"], ConfigurationManager.AppSettings["CloudinaryApiKey"], ConfigurationManager.AppSettings["CloudinaryApiSecret"]);
+            var account = new Account(
+                ConfigurationManager.AppSettings["CloudinaryCloud"],
+                ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                ConfigurationManager.AppSettings["CloudinaryApiSecret"]);
 
             var cloudinary = new Cloudinary(account);
-            var uploadParams = new ImageUploadParams()
-            {
+            var uploadParams = new ImageUploadParams {
                 File = new FileDescription(url)
             };
+
             var uploadResult = await cloudinary.UploadAsync(uploadParams);
 
             return uploadResult.Uri.AbsoluteUri;
+
         }
 
-//        private static IImage UploadPhoto(string url)
+        //        private static IImage UploadPhoto(string url)
 //        {
 //            var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
 //            var endpoint = new ImageEndpoint(imgur);

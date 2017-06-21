@@ -93,7 +93,8 @@ namespace vk2tg.Services
                 return t;
             }
 
-            await _dataService.AddErrorLog(content);
+            await _dataService.AddTraceLog($"GetListResult. Method:{method} token:{token} parameters:{parameters}");
+            await _dataService.AddTraceLog($"GetListResult. result?.Response?.Count:{result?.Response?.Count}");
             Trace.WriteLine(content);
 
             var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
