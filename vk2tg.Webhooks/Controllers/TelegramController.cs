@@ -87,11 +87,18 @@ namespace vk2tg.Webhooks.Controllers
 
                         case "/list":
                             var list = await _dataService.GetUserSubscriptions(chatId);
-                            var sb = new StringBuilder(Texts.YourSubscriptions);
-                            sb.AppendLine();
-                            foreach (var item in list)
+                            var sb = new StringBuilder();
+                            if (list.Any())
                             {
-                                sb.AppendLine($"_{item}_");
+                                sb.AppendLine(Texts.YourSubscriptions);
+                                foreach (var item in list)
+                                {
+                                    sb.AppendLine($"_{item}_");
+                                }
+                            }
+                            else
+                            {
+                                sb.AppendLine(Texts.NoSubscriptions);
                             }
 
                             await _tgService.SendMessage(chatId, sb.ToString(), ParseMode.Markdown);
