@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace vk2tg.Services
         private const string UnsupportedAttachment = "Unsupported attachment";
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
         private readonly DataService _dataService = new DataService();
+        private readonly List<string> _tokens = ConfigurationManager.AppSettings["Cloudinary"].Split(';').ToList();
 
 
         public async Task<string> CreatePage(WallPost post, string groupName, string groupPrettyName)
@@ -131,44 +133,55 @@ namespace vk2tg.Services
 
         private async Task<string> UploadToCloudinary(string url)
         {
-            var account = new Account(
-                ConfigurationManager.AppSettings["CloudinaryCloud"],
-                ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                ConfigurationManager.AppSettings["CloudinaryApiSecret"]);
+            foreach(var creds in EnumerateCloudinaryTokens())
+            {
+                var splitted = creds.Split(',');
+                var account = new Account(splitted[0], splitted[1], splitted[2]);
 
-            var cloudinary = new Cloudinary(account);
-            var uploadParams = new ImageUploadParams {
-                File = new FileDescription(url)
-            };
+                var cloudinary = new Cloudinary(account);
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(url)
+                };
 
-            var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                return uploadResult.Uri.AbsoluteUri;
+            }
 
-            return uploadResult.Uri.AbsoluteUri;
+            return null;
+        }
 
+        private IEnumerable<string> EnumerateCloudinaryTokens()
+        {
+            var index = 0;
+            while (_tokens.Count != 0)
+            {
+                yield return _tokens[index++ % _tokens.Count];
+            }
         }
 
         //        private static IImage UploadPhoto(string url)
-//        {
-//            var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
-//            var endpoint = new ImageEndpoint(imgur);
-//            var limit = endpoint.ApiClient.RateLimit;
-//            GetImgurLimit();
-//            try
-//            {
-//                var result = endpoint.UploadImageUrlAsync(url).Result;
-//                return result;
-//            }
-//            catch(ImgurException e)
-//            {
-//                _dataService.AddErrorLogSync(e);
-//                if(e.InnerException != null)
-//                {
-//                    _dataService.AddErrorLogSync(e);
-//                }
-//            }
-//
-//            return null;
-//        }
+        //        {
+        //            var imgur = new ImgurClient(ConfigurationManager.AppSettings["ImgurClientId"], ConfigurationManager.AppSettings["ImgurClientSecret"]);
+        //            var endpoint = new ImageEndpoint(imgur);
+        //            var limit = endpoint.ApiClient.RateLimit;
+        //            GetImgurLimit();
+        //            try
+        //            {
+        //                var result = endpoint.UploadImageUrlAsync(url).Result;
+        //                return result;
+        //            }
+        //            catch(ImgurException e)
+        //            {
+        //                _dataService.AddErrorLogSync(e);
+        //                if(e.InnerException != null)
+        //                {
+        //                    _dataService.AddErrorLogSync(e);
+        //                }
+        //            }
+        //
+        //            return null;
+        //        }
 
         private static object DomToNode(HtmlNode node)
         {
