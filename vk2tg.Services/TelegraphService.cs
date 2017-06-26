@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text;
@@ -26,7 +27,7 @@ namespace vk2tg.Services
         private const string AuthorUrlTemplate = "https://vk.com/{0}?w=wall{1}_{2}";
         private readonly DataService _dataService = new DataService();
         private readonly List<string> _tokens = ConfigurationManager.AppSettings["Cloudinary"].Split(';').ToList();
-
+        private readonly Random r = new Random();
 
         public async Task<string> CreatePage(WallPost post, string groupName, string groupPrettyName)
         {
@@ -133,22 +134,22 @@ namespace vk2tg.Services
 
         private async Task<string> UploadToCloudinary(string url)
         {
-            foreach(var creds in EnumerateCloudinaryTokens())
-            {
-                var splitted = creds.Split(',');
-                var account = new Account(splitted[0], splitted[1], splitted[2]);
+            var creds = RandomizeTokens();
+            var splitted = creds.Split(',');
+            var account = new Account(splitted[0], splitted[1], splitted[2]);
 
-                var cloudinary = new Cloudinary(account);
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription(url)
-                };
+            var cloudinary = new Cloudinary(account);
+            var uploadParams = new ImageUploadParams {
+                File = new FileDescription(url)
+            };
 
-                var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                return uploadResult.Uri.AbsoluteUri;
-            }
+            var uploadResult = await cloudinary.UploadAsync(uploadParams);
+            return uploadResult.Uri.AbsoluteUri;
+        }
 
-            return null;
+        private string RandomizeTokens()
+        {
+            return _tokens[r.Next(_tokens.Count - 1)];
         }
 
         private IEnumerable<string> EnumerateCloudinaryTokens()
