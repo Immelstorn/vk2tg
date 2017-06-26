@@ -149,7 +149,7 @@ namespace vk2tg.Services
 
         private string RandomizeTokens()
         {
-            return _tokens[r.Next(_tokens.Count - 1)];
+            return _tokens[r.Next(_tokens.Count)];
         }
 
         private IEnumerable<string> EnumerateCloudinaryTokens()
