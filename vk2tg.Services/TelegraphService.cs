@@ -18,7 +18,7 @@ namespace vk2tg.Services
     public class TelegraphService
     {
         private const string TelegraphUrl = "https://api.telegra.ph/createPage";
-        private static readonly string TelegraphAccessToken = ConfigurationManager.AppSettings["TelegraphAccessToken"];
+        private static readonly string[] TelegraphAccessTokens = ConfigurationManager.AppSettings["TelegraphAccessToken"].Split(';');
         private const string ImgTemplate = "<img src='{0}'/>";
         private const string HrefTemplate = "<a href='{0}'>{1}</a>";
         private const string VideoTemplate = "<a href='{0}'>Video: {0}</a>";
@@ -94,20 +94,26 @@ namespace vk2tg.Services
             }
             var json = jArray.ToString();
 
-
-            var client = new RestClient(TelegraphUrl);
-            var request = new RestRequest(Method.POST);
-            request.AddParameter("access_token", TelegraphAccessToken);
-            request.AddParameter("title", groupPrettyName);
-            request.AddParameter("author_name", groupPrettyName);
-            request.AddParameter("author_url", string.Format(AuthorUrlTemplate, groupName, post.from_id, post.id));
-            request.AddParameter("content", json);
-            var response = client.Execute(request);
-            var content = response.Content;
-            var result = JsonConvert.DeserializeObject<TelegraphResponse>(content);
-            if (result.ok != "false")
+            foreach(var token in TelegraphAccessTokens)
             {
-                return result.result.url;
+                var client = new RestClient(TelegraphUrl);
+                var request = new RestRequest(Method.POST);
+                request.AddParameter("access_token", token);
+                request.AddParameter("title", groupPrettyName);
+                request.AddParameter("author_name", groupPrettyName);
+                request.AddParameter("author_url", string.Format(AuthorUrlTemplate, groupName, post.from_id, post.id));
+                request.AddParameter("content", json);
+                var response = client.Execute(request);
+                var content = response.Content;
+                var result = JsonConvert.DeserializeObject<TelegraphResponse>(content);
+               
+                if (result.ok != "false")
+                {
+                    return result.result.url;
+                }
+                await _dataService.AddTraceLog($"result.ok {result.ok}");
+                await _dataService.AddTraceLog($"result.error {result.error}");
+                await _dataService.AddTraceLog($"result.result.url {result.result.url}");
             }
 
             return null;
@@ -152,14 +158,14 @@ namespace vk2tg.Services
             return _tokens[r.Next(_tokens.Count)];
         }
 
-        private IEnumerable<string> EnumerateCloudinaryTokens()
-        {
-            var index = 0;
-            while (_tokens.Count != 0)
-            {
-                yield return _tokens[index++ % _tokens.Count];
-            }
-        }
+//        private IEnumerable<string> EnumerateTelegraphTokens()
+//        {
+//            var index = 0;
+//            while (TelegraphAccessTokens.Length != 0)
+//            {
+//                yield return TelegraphAccessTokens[index++ % TelegraphAccessTokens.Count];
+//            }
+//        }
 
         //        private static IImage UploadPhoto(string url)
         //        {
