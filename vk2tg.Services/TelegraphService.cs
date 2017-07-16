@@ -94,7 +94,8 @@ namespace vk2tg.Services
             }
             var json = jArray.ToString();
 
-            foreach(var token in TelegraphAccessTokens)
+            var allowedTokens = await  _dataService.AllowedTokens(TelegraphAccessTokens);
+            foreach(var token in allowedTokens)
             {
                 var client = new RestClient(TelegraphUrl);
                 var request = new RestRequest(Method.POST);
@@ -111,9 +112,17 @@ namespace vk2tg.Services
                 {
                     return result.result.url;
                 }
+
+                if(result.error.Contains("FLOOD_WAIT"))
+                {
+                    var wait = result.error.Replace("FLOOD_WAIT_", string.Empty);
+                    if (int.TryParse(wait, out int seconds))
+                    {
+                        await _dataService.AddWait(token, seconds);
+                    }
+                }
                 await _dataService.AddTraceLog($"result.ok {result.ok}");
                 await _dataService.AddTraceLog($"result.error {result.error}");
-                await _dataService.AddTraceLog($"result.result.url {result.result.url}");
             }
 
             return null;

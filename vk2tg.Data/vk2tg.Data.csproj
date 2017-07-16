@@ -93,10 +93,15 @@
     <Compile Include="Migrations\201706151749054_userHasBlocked.Designer.cs">
       <DependentUpon>201706151749054_userHasBlocked.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201707161315541_addtokensWaits.cs" />
+    <Compile Include="Migrations\201707161315541_addtokensWaits.Designer.cs">
+      <DependentUpon>201707161315541_addtokensWaits.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\DB\ErrorLog.cs" />
     <Compile Include="Models\DB\Log.cs" />
     <Compile Include="Models\DB\Subscription.cs" />
+    <Compile Include="Models\DB\TokensWait.cs" />
     <Compile Include="Models\Telegraph\TelegraphContent.cs" />
     <Compile Include="Models\Telegraph\TelegraphResponse.cs" />
     <Compile Include="Models\Telegraph\TelegraphResult.cs" />
@@ -161,6 +166,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201706151749054_userHasBlocked.resx">
       <DependentUpon>201706151749054_userHasBlocked.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201707161315541_addtokensWaits.resx">
+      <DependentUpon>201707161315541_addtokensWaits.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

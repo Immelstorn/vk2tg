@@ -175,8 +175,33 @@ namespace vk2tg.Services
                 });
                await  db.SaveChangesAsync();
             }
-        }   
+        }
 
+        public async Task AddWait(string token, int seconds)
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                db.TokensWaits.Add(new TokensWait
+                {
+                   Token = token,
+                   WaitUntil = DateTime.UtcNow.AddSeconds(seconds)
+                });
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task<List<string>> AllowedTokens(string[] tokens)
+        {
+            using(var db = new Vk2TgDbContext())
+            {
+                var delete = await db.TokensWaits.Where(w => w.WaitUntil < DateTime.UtcNow).ToListAsync();
+                db.TokensWaits.RemoveRange(delete);
+                await db.SaveChangesAsync();
+                var tokensToWait = await db.TokensWaits.Select(t => t.Token).ToListAsync();
+
+                return tokens.Except(tokensToWait).ToList();
+            }
+        }
 
         public async Task AddTraceLog(string message)
         {

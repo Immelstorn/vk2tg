@@ -15,6 +15,8 @@ namespace vk2tg.Data.Models
         public DbSet<Log> Logs { get; set; }
         public DbSet<ErrorLog> ErrorLogs { get; set; }
 
+        public DbSet<TokensWait> TokensWaits { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
