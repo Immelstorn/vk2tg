@@ -95,7 +95,8 @@ namespace vk2tg.Services
             var json = jArray.ToString();
 
             var allowedTokens = await  _dataService.AllowedTokens(TelegraphAccessTokens);
-            foreach(var token in allowedTokens)
+            var randomizedTokens = allowedTokens.OrderBy(a => r.Next());
+            foreach (var token in randomizedTokens)
             {
                 var client = new RestClient(TelegraphUrl);
                 var request = new RestRequest(Method.POST);
