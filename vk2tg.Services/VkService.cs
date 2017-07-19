@@ -58,7 +58,8 @@ namespace vk2tg.Services
 
                 await _dataService.AddErrorLog(content);
                 //                var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
-                Trace.WriteLine(content);
+                await _dataService.AddTraceLog($"GetGroupInfo content:{content}");
+
                 _tokens.Remove(token);
             }
 
@@ -95,12 +96,12 @@ namespace vk2tg.Services
 
             await _dataService.AddTraceLog($"GetListResult. Method:{method} token:{token} parameters:{parameters}");
             await _dataService.AddTraceLog($"GetListResult. result?.Response?.Count:{result?.Response?.Count}");
-            Trace.WriteLine(content);
+            await _dataService.AddTraceLog($"GetListResult content:{content}");
 
             var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
             if(error.error.error_code != 15) //Access denied
             {
-                _tokens.Remove(token);
+                _tokens.Remove(token);  
             }
 
             return null;
