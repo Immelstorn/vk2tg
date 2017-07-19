@@ -56,7 +56,6 @@ namespace vk2tg.Services
                     return result.response.First();
                 }
 
-                await _dataService.AddErrorLog(content);
                 //                var error = JsonConvert.DeserializeObject<ErrorResponse>(content);
                 await _dataService.AddTraceLog($"GetGroupInfo content:{content}");
 
