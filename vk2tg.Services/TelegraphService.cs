@@ -12,6 +12,8 @@ using Newtonsoft.Json.Linq;
 using RestSharp;
 using vk2tg.Data.Models.Telegraph;
 using vk2tg.Data.Models.VK;
+using Microsoft.WindowsAzure.Storage;
+
 
 namespace vk2tg.Services
 {
@@ -131,7 +133,7 @@ namespace vk2tg.Services
 
         private async Task<string> UploadImageAndGetHtml(string imgUrl)
         {
-            var uploadResult = imgUrl == null ? null : await UploadToCloudinary(imgUrl);
+            var uploadResult = imgUrl == null ? null : await UploadToBlob(imgUrl);
             return string.Format(ImgTemplate,
                                  string.IsNullOrEmpty(uploadResult)
                                      ? imgUrl
@@ -147,6 +149,18 @@ namespace vk2tg.Services
 //            var content = response.Content;
 //            _dataService.AddTraceLogSync(content);
 //        }
+
+        private async Task<string> UploadToBlob(string url)
+        {
+            var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["BlobStorage"]);
+            var blobClient = storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference("vk2tg");
+            var filename = Guid.NewGuid().ToString();
+            var blockBlob = container.GetBlockBlobReference(filename);
+            await blockBlob.StartCopyAsync(new Uri(url));
+            var file = "https://vk2tg.blob.core.windows.net/vk2tg/" + filename;
+            return file;
+        }
 
         private async Task<string> UploadToCloudinary(string url)
         {
