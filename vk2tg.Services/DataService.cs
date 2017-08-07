@@ -10,6 +10,14 @@ namespace vk2tg.Services
 {
     public class DataService
     {
+        public async Task<DateTime> GetLastLogDate()
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                return await db.Logs.OrderByDescending(l => l.DateTime).Select(l => l.DateTime).FirstAsync();
+            }
+        }
+
         public async Task<bool> UserExists(long chatId)
         {
             using(var db = new Vk2TgDbContext())

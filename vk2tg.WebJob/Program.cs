@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
 using vk2tg.Services;
 
 namespace vk2tg.WebJob
@@ -12,6 +15,7 @@ namespace vk2tg.WebJob
         private static readonly VkService _vkService = new VkService();
         private static readonly TelegraphService _telegraphService = new TelegraphService();
         private static readonly TgService _tgService = new TgService();
+        private static readonly int DaysToKeepBlobs = 14;
 
         static void Main(string[] args)
         {
@@ -46,9 +50,23 @@ namespace vk2tg.WebJob
             }
         }
 
+        private static async Task DeleteOldBlobs()
+        {
+            var storageAccount = CloudStorageAccount.Parse(ConfigurationManager.AppSettings["BlobStorage"]);
+            var blobClient = storageAccount.CreateCloudBlobClient();
+            var container = blobClient.GetContainerReference("vk2tg");
+            var blobs = container.ListBlobs("", true).OfType<CloudBlockBlob>().Where(b => b.Properties.LastModified.Value.DateTime < DateTime.UtcNow.AddDays(-DaysToKeepBlobs)).ToList();
+
+            foreach (var blob in blobs)
+            {
+                await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.None, AccessCondition.GenerateIfNotModifiedSinceCondition(DateTime.Now.AddDays(-DaysToKeepBlobs)), null, null);
+            }
+        }
+
         private static async Task AsyncMain()   
         {
             await _dataService.AddTraceLog("Sync started");
+
             var subscriptions = await _dataService.GetSubscriptionsToCheck();
 
             foreach (var subscription in subscriptions)
@@ -59,6 +77,12 @@ namespace vk2tg.WebJob
                 {
                     try
                     {
+                        var lastLogDate = await _dataService.GetLastLogDate();
+                        if (lastLogDate.Date < DateTime.Now.Date)
+                        {
+                            await DeleteOldBlobs();
+                        }
+
                         var link = await _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
                         await _dataService.AddLog(subscription.Id, post.id, link);
 
