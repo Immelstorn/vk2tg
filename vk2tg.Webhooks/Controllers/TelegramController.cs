@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using vk2tg.Data.Models;
+using Telegram.Bot.Types.InlineKeyboardButtons;
+using Telegram.Bot.Types.ReplyMarkups;
 using vk2tg.Data.Models.DB;
 using vk2tg.Services;
+using User = vk2tg.Data.Models.DB.User;
 
 namespace vk2tg.Webhooks.Controllers
 {
@@ -31,6 +33,10 @@ namespace vk2tg.Webhooks.Controllers
                 {
                     await ProcessUpdate(update);
                 }
+                if(update.CallbackQuery != null)
+                {
+                    await ProcessCallback(update);
+                }
             }
             catch(AggregateException a)
             {
@@ -41,7 +47,7 @@ namespace vk2tg.Webhooks.Controllers
                     Trace.TraceError(exception.StackTrace);
                     try
                     {
-                        _dataService.AddErrorLog(exception);
+                        await _dataService.AddErrorLog(exception);
                     }
                     catch (Exception) { }
                 }
@@ -53,9 +59,22 @@ namespace vk2tg.Webhooks.Controllers
                 Trace.TraceError(e.StackTrace);
                 try
                 {
-                    _dataService.AddErrorLog(e);
+                    await _dataService.AddErrorLog(e);
                 }
                 catch (Exception) { }
+            }
+        }
+
+        private async Task ProcessCallback(Update update)
+        {
+            if(!string.IsNullOrEmpty(update.CallbackQuery.Data))
+            {
+                switch(update.CallbackQuery.Data)
+                {
+                    case "bitcoin":
+                        await _tgService.AnswerBitcoinCallback(update.CallbackQuery.Id, update.CallbackQuery.Message.Chat.Id);
+                        return;
+                }
             }
         }
 
@@ -108,11 +127,62 @@ namespace vk2tg.Webhooks.Controllers
                             var groupName = GetGroupName(update.Message.Text);
                             await Unsubscribe(groupName, chatId);
                             return;
+
+                        case "/donate":
+                            await Donate(chatId);
+                            return;
                     }
                 }
             }
 
             await _tgService.SendMessage(update.Message.Chat.Id, Texts.PleaseUseOnlyOneCommand); 
+        }
+
+        private async Task SendDonateMessage(User user)
+        {
+            var msg = new StringBuilder();
+            msg.AppendLine("Дорогой пользователь!");
+            msg.AppendLine();
+            msg.AppendLine("Я очень рад что тебе понравился этот бот и ты им пользуешься, но, к сожалению, пользователей становится все больше, и счет за хостинг тоже растет.");
+            msg.AppendLine();
+            msg.AppendLine("Я очень не хотел этого делать, но придется попросить тебя о помощи.");
+            msg.AppendLine("Если ты хочешь, чтобы этот бот продолжал работать тебе и другим на радость - пожалуйста, пожертвуй немного денег на хостинг.");
+            msg.AppendLine();
+            if(user.Subscriptions.Count <= 5)
+            {
+                msg.AppendLine("Всего $1 в месяц спасет этого бота от забвения.");
+                msg.AppendLine("Но конечно же ты волен сам решать, сколько жертвовать, и жертвовать ли вообще.");
+            }
+            else
+            {
+                msg.AppendLine($"Всего 20 центов в месяц, за каждую из твоих {user.Subscriptions.Count} подписок спасут бота от забвения.");
+                msg.AppendLine($"По моим расчётам это выходит {user.Subscriptions.Count * 0.2} USD, но конечно же ты волен сам решать сколько жертвовать, и жертвовать ли вообще.");
+            }
+            msg.AppendLine();
+            msg.AppendLine("В любом случае, я благодарен тебе за то что ты пользуешься этим ботом.");
+            msg.AppendLine("Если что - вот две кнопки, можешь воспользоваться ими.");
+
+
+            var markup = new InlineKeyboardMarkup(
+                new[] {
+                    InlineKeyboardButton.WithCallbackData("Donate via Bitcoin", "bitcoin"),
+                    InlineKeyboardButton.WithUrl("Donate via PayPal", "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HRWRE3WUK8UQA")
+                });
+
+            await _tgService.SendMessage(user.ChatId, msg.ToString(), markup);
+            await _dataService.DonateMessageSent(user.ChatId);
+        }
+
+        private async Task Donate(long chatId)
+        {
+            if (chatId == 72208686)
+            {
+                var users = await _dataService.GetUsersToSendDonateMessage();
+                foreach (var user in users)
+                {
+                    await SendDonateMessage(user);
+                };
+            }
         }
 
         private async Task Unsubscribe(string result, long chatId)

@@ -12,6 +12,7 @@ namespace vk2tg.Data.Models.DB
         public string LastName { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool HasBlocked { get; set; }
+        public bool DonateMessageSent { get; set; }
         public virtual ICollection<Subscription> Subscriptions { get; set; }
     }
 }

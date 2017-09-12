@@ -10,6 +10,14 @@ namespace vk2tg.Services
 {
     public class DataService
     {
+        public async Task<List<User>> GetUsersToSendDonateMessage()
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                return await db.Users.Include(u => u.Subscriptions).Where(u => !u.HasBlocked && !u.DonateMessageSent).ToListAsync();
+            }
+        }
+
         public async Task<DateTime> GetLastLogDate()
         {
             using (var db = new Vk2TgDbContext())
@@ -249,6 +257,19 @@ namespace vk2tg.Services
                 if (user != null)
                 {
                     user.HasBlocked = true;
+                    await db.SaveChangesAsync();
+                }
+            }
+        }
+
+        public async Task DonateMessageSent(long chatId)
+        {
+            using(var db = new Vk2TgDbContext())
+            {
+                var user = await db.Users.Where(u => u.ChatId == chatId).FirstOrDefaultAsync();
+                if (user != null)
+                {
+                    user.DonateMessageSent = true;
                     await db.SaveChangesAsync();
                 }
             }

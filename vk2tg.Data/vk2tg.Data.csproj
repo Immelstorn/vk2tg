@@ -97,6 +97,10 @@
     <Compile Include="Migrations\201707161315541_addtokensWaits.Designer.cs">
       <DependentUpon>201707161315541_addtokensWaits.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201709121913070_addDonationMessage.cs" />
+    <Compile Include="Migrations\201709121913070_addDonationMessage.Designer.cs">
+      <DependentUpon>201709121913070_addDonationMessage.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\DB\ErrorLog.cs" />
     <Compile Include="Models\DB\Log.cs" />
@@ -169,6 +173,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201707161315541_addtokensWaits.resx">
       <DependentUpon>201707161315541_addtokensWaits.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201709121913070_addDonationMessage.resx">
+      <DependentUpon>201709121913070_addDonationMessage.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
