@@ -22,7 +22,7 @@ namespace vk2tg.Services
         {
             using (var db = new Vk2TgDbContext())
             {
-                return await db.Logs.OrderByDescending(l => l.DateTime).Select(l => l.DateTime).FirstAsync();
+                return await db.Logs.AnyAsync() ? await db.Logs.OrderByDescending(l => l.DateTime).Select(l => l.DateTime).FirstOrDefaultAsync() : DateTime.Now;
             }
         }
 
