@@ -169,7 +169,18 @@ namespace vk2tg.Webhooks.Controllers
                     InlineKeyboardButton.WithUrl("Donate via PayPal", "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HRWRE3WUK8UQA")
                 });
 
-            await _tgService.SendMessage(user.ChatId, msg.ToString(), markup);
+            try
+            {
+                await _tgService.SendMessage(user.ChatId, msg.ToString(), markup); 
+                
+            }
+            catch(Exception e)
+            {
+                if (e.Message.Equals("Forbidden: user is deactivated"))
+                {
+                    await _dataService.RemoveUser(user.ChatId);
+                }
+            }
             await _dataService.DonateMessageSent(user.ChatId);
         }
 

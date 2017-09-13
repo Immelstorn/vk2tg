@@ -274,5 +274,23 @@ namespace vk2tg.Services
                 }
             }
         }
+
+        public async Task RemoveUser(long chatId)
+        {
+            using (var db = new Vk2TgDbContext())
+            {
+                var user = await db.Users.Where(u => u.ChatId == chatId).FirstOrDefaultAsync();
+                if (user != null)
+                {
+                    db.Users.Remove(user);
+                    await db.SaveChangesAsync();
+                }
+                var subscriptions = await db.Subscriptions.Where(s => !s.Users.Any()).ToListAsync();
+                if (!subscriptions.Any())
+                {
+                    db.Subscriptions.RemoveRange(subscriptions);
+                }
+            }
+        }
     }
 }
