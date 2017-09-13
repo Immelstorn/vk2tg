@@ -181,6 +181,7 @@ namespace vk2tg.Webhooks.Controllers
                 foreach (var user in users)
                 {
                     await SendDonateMessage(user);
+                    await Task.Delay(1000);
                 };
             }
         }
