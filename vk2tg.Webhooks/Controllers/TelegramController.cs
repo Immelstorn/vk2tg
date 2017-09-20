@@ -112,7 +112,7 @@ namespace vk2tg.Webhooks.Controllers
                                 sb.AppendLine(Texts.YourSubscriptions);
                                 foreach (var item in list)
                                 {
-                                    sb.AppendLine($"_{item}_");
+                                    sb.AppendLine($"{item}");
                                 }
                             }
                             else
@@ -120,7 +120,7 @@ namespace vk2tg.Webhooks.Controllers
                                 sb.AppendLine(Texts.NoSubscriptions);
                             }
 
-                            await _tgService.SendMessage(chatId, sb.ToString(), ParseMode.Markdown);
+                            await _tgService.SendMessage(chatId, sb.ToString());
                             return;
 
                         case "/unsubscribe":
