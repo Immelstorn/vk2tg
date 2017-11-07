@@ -83,27 +83,27 @@ namespace vk2tg.WebJob
                             await DeleteOldBlobs();
                         }
 
-                        var link = await _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
-                        await _dataService.AddLog(subscription.Id, post.id, link);
-
-                        foreach(var user in subscription.Users.Where(u => !u.HasBlocked))
-                        {
-                            try
-                            {
-                                await _tgService.SendMessage(user.ChatId, link);
-                            }
-                            catch(Exception e)
-                            {
-                                if(e.Message.Equals("Forbidden: bot was blocked by the user"))
-                                {
-                                    await _dataService.Block(user.ChatId);
-                                }
-                                else
-                                {
-                                    throw;
-                                }
-                            }
-                        }
+//                        var link = await _telegraphService.CreatePage(post, subscription.SubscriptionName, subscription.SubscriptionPrettyName ?? subscription.SubscriptionName);
+//                        await _dataService.AddLog(subscription.Id, post.id, link);
+//
+//                        foreach(var user in subscription.Users.Where(u => !u.HasBlocked))
+//                        {
+//                            try
+//                            {
+//                                await _tgService.SendMessage(user.ChatId, link);
+//                            }
+//                            catch(Exception e)
+//                            {
+//                                if(e.Message.Equals("Forbidden: bot was blocked by the user"))
+//                                {
+//                                    await _dataService.Block(user.ChatId);
+//                                }
+//                                else
+//                                {
+//                                    throw;
+//                                }
+//                            }
+//                        }
 
                         await _dataService.SetLastPost(subscription.SubscriptionId, post.id);
                     }
